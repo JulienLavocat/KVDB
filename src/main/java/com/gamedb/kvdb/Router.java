@@ -1,5 +1,12 @@
 package com.gamedb.kvdb;
 
+import java.io.IOException;
+import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map.Entry;
+import java.util.UUID;
+import java.util.ArrayList;
+
 import org.eclipse.jetty.websocket.api.CloseStatus;
 
 import com.gamedb.kvdb.http.ClearAnswer;
@@ -17,17 +24,39 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
+import org.mapdb.DB;
+
 public class Router {
 
 	public static final String KEY = "KVDBSecuruti";
 	public static Gson gson = new Gson();
+	public static String index;
 
-	public Router() {
+	public Router() throws IOException {
 
 		Javalin app = Javalin.start(80);
 
+		index = new String(java.nio.file.Files.readAllBytes(Paths.get("public/index.html")));
+		
+		app.get("/", ctx -> {
+			ctx.html(index);
+		});
+		
 		app.get("/tables/", ctx -> {
-			ctx.json(Tables.db.getAllNames());
+			
+			HashMap<String, ArrayList<String>> map = new HashMap<String, ArrayList<String>>();
+			
+			for(Entry<UUID, DB> entry : Files.dbs.entrySet()) {
+				
+				ArrayList<String> tables = new ArrayList<String>();
+				
+				Iterable<String> it = entry.getValue().getAllNames();
+				it.forEach(tables::add);
+				
+				map.put(entry.getKey().toString(), tables);
+			}
+			
+			ctx.json(map);
 		});
 
 		app.get("/tables/:table", ctx -> {

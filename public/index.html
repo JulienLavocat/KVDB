@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+	<head>
+		<title>KVDb Documentation</title>
+		<meta charset="UTF-8">
+	</head>
+
+	<body>
+<h2 id="kvdb">KVDB</h2>
+
+<p>KVDB is a database, accessible via a REST interface or websockets. Data are are stored on disk, with key-value mapped datas.
+Thoses key-value pairs are stored inside of tables.</p>
+
+<h2 id="endpoints">Endpoints</h2>
+
+<pre><code>GET /tables/:tableName/
+    Show table informations (content).
+
+GET /tables/:tableName/get/:key
+    Show the value associated with key in table.
+
+GET /tables/:tableName/put/?key={key}&amp;value={value}
+    Put the key-value pair in table. Returns if the value already exists.
+
+GET /tables/:tableName/exist/:key
+    Return true if the requested key exist.
+
+GET /tables/:tableName/delete/:key
+    Delete the key-value pair if it exist, return true if it deleted the key.
+
+GET /tables/:tableName/clear
+    Clear all the content of the table.
+
+GET /tables/:tableName/size
+    Return the number of key-value pair in table.
+</code></pre>
+
+<h2 id="security">Security</h2>
+
+<p>In KVDB, security is based on tokens. For each tables, a Json Web Token (JWT) is generated. This token must be provided in each request to the database as a query-parameter called "token" like this :</p>
+
+<pre><code>GET /tables/:tableName/clear?token={token}
+</code></pre>
+
+<p>You can get a token (for testing purposes) using the following endpoint :</p>
+
+<pre><code>GET /token?user={userid}&amp;table={tableName}
+</code></pre>
+
+<p>User ID must be registered in the users.json file before any usage !
+Registered user ids are:</p>
+
+<ul>
+<li>154bd80b-7291-4fab-b7dc-eb60456b7079</li>
+
+<li>324dd961-8c93-48de-bca7-73dc50ddad42</li>
+
+<li>b0fb831c-efac-441c-b920-23ce9b8406c0</li>
+
+<li>547c4e5a-4ed7-4873-b008-5d26076ba2d5</li>
+
+<li>754dc8dd-296c-4c69-8367-13d92b1d2e51</li>
+
+<li>58f4da5a-2dad-4de4-b03a-d87fd892aec3</li>
+
+<li>1115d831-c6aa-4d61-9b7a-25b73b709aba</li>
+
+<li>b0f7c006-49c0-4ff8-adf0-93474a95dc2f</li>
+
+<li>827254ee-66ae-4238-8a59-9969d5dc9f7a</li>
+
+<li>f83a21ec-f0c8-4da7-8669-1f90a3244d23</li>
+</ul>
+
+<h2 id="websocket">WebSocket</h2>
+
+<p>In order to access datas of a table, you can use REST endpoints or Websocket.
+WebSocket is accessible via the following address:</p>
+
+<pre><code>ws://{ip}/tables/:tableName
+</code></pre>
+
+<p>To succesfully connect to the server, you need to provide the authentication token in query-parameter like this:</p>
+
+<pre><code>ws://{ip}/tables/:tableName?token={token}
+</code></pre>
+
+<p>Once authentication is done, the database return you the user id, this id must be sent in every request you will do later on.</p>
+
+<p>From here, you can make every request you want on the table. WebSocket request are sent under the format of a string, each argument separated using this separator: 
+<code>§*/:</code></p>
+
+<p>Here is a list of all the possible request and their parameters:</p>
+
+<pre><code>SHOW TABLE - show§*/:{user_id}
+
+PUT - put§*/:{user_id}§*/:{key}§*/:{value}
+
+GET - get§*/:{user_id}§*/:{key}
+
+EXIST - exist§*/:{user_id}§*/:{key}
+
+SIZE - size§*/:{user_id}
+
+DELETE - delete§*/:{user_id}§*/:{key}
+
+CLEAR - clear§*/:{user_id}
+</code></pre>
+	</body>
+
+</html>
