@@ -33,4 +33,35 @@ You can get a token (for testing purposes) using the following endpoint :
     GET /token?user={userid}&table={tableName}
 User ID must be registered in the users.json file before any usage !
 
+## WebSocket
+In order to access datas of a table, you can use REST endpoints or Websocket.
+WebSocket is accessible via the following address:
+
+    ws://{ip}/tables/:tableName
+   
+   To succesfully connect to the server, you need to provide the authentication token in query-parameter like this:
+   
+
+    ws://{ip}/tables/:tableName?token={token}
+
+Once authentication is done, the database return you the user id, this id must be sent in every request you will do later on.
+
+From here, you can make every request you want on the table. WebSocket request are sent under the format of a string, each argument separated using this separator: 
+`§*/:`
+
+Here is a list of all the possible request and their parameters:
+
+    SHOW TABLE - show§*/:{user_id}
+
+	PUT - put§*/:{user_id}§*/:{key}§*/:{value}
+
+	GET - get§*/:{user_id}§*/:{key}
+	
+	EXIST - exist§*/:{user_id}§*/:{key}
+
+	SIZE - size§*/:{user_id}
+
+	DELETE - delete§*/:{user_id}§*/:{key}
+	
+	CLEAR - clear§*/:{user_id}
 
