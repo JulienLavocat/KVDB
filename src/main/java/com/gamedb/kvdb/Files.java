@@ -60,10 +60,7 @@ public class Files {
 
 	public static void commit() {
 		
-		synchronized (dbs) {
-			for(DB db : dbs.values())
-				db.commit();
-		}
+
 		
 	}
 	
