@@ -7,23 +7,31 @@ public class Main {
 
 	public static void main(String[] args) throws Exception {
 
-		Tables.start();
-		
-		Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(new Runnable() {
+		try {
+			Report.start();
+			
+			Files.start();
+			
+			Tables.start();
+			
+			Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(new Runnable() {
 
-			@Override
-			public void run() {
-				
-				synchronized (Tables.db) {
-					Tables.db.commit();
+				@Override
+				public void run() {
+					
+					synchronized (Tables.db) {
+						Tables.db.commit();
+					}
+					
 				}
 				
-			}
+			}, 2, 2, TimeUnit.SECONDS);
 			
-		}, 2, 2, TimeUnit.SECONDS);
-		
-		new Router();
-
+			new Router();
+		} catch(Exception e) {
+			Report.report(e);
+			e.printStackTrace();
+		}
 	}
 
 }

@@ -3,12 +3,14 @@ package com.gamedb.kvdb;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.UUID;
 
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
 import org.mapdb.HTreeMap;
 import org.mapdb.Serializer;
 
+import com.gamedb.kvdb.exceptions.DatabaseNotFoundException;
 import com.gamedb.kvdb.http.ClearAnswer;
 import com.gamedb.kvdb.http.DeleteAnswer;
 import com.gamedb.kvdb.http.ExistAnswer;
@@ -31,35 +33,63 @@ public class Tables {
 				.make();
 	}
 	
-	public static GetMapAnswer getMap(String table) {
-		return new GetMapAnswer(table, db.hashMap(table, Serializer.STRING, Serializer.STRING).createOrOpen());
+	public static GetMapAnswer getMap(String user, String table) {
+		try {
+			return new GetMapAnswer(table, Files.getDB(UUID.fromString(user)).hashMap(table, Serializer.STRING, Serializer.STRING).createOrOpen());
+		} catch (DatabaseNotFoundException e) {
+			return new GetMapAnswer();
+		}
 	}
 	
-	public static ExistAnswer exist(String table, String key) {
-		return new ExistAnswer(table, key, db.hashMap(table, Serializer.STRING, Serializer.STRING).createOrOpen().containsKey(key));
+	public static ExistAnswer exist(String user, String table, String key) {
+		try {
+			return new ExistAnswer(table, key, Files.getDB(UUID.fromString(user)).hashMap(table, Serializer.STRING, Serializer.STRING).createOrOpen().containsKey(key));
+		} catch (DatabaseNotFoundException e) {
+			return new ExistAnswer();
+		}
 	}
 	
-	public static PutAnswer put(String table, String key, String value) {
-		return new PutAnswer(table, key, value, db.hashMap(table, Serializer.STRING, Serializer.STRING).createOrOpen().put(key, value) == null); 
+	public static PutAnswer put(String user, String table, String key, String value) {
+		try {
+			return new PutAnswer(table, key, value, Files.getDB(UUID.fromString(user)).hashMap(table, Serializer.STRING, Serializer.STRING).createOrOpen().put(key, value) == null);
+		} catch (DatabaseNotFoundException e) {
+			return new PutAnswer();
+		} 
 	}
 
-	public static GetAnswer get(String table, String key) {
-		return new GetAnswer(table, db.hashMap(table, Serializer.STRING, Serializer.STRING).createOrOpen().get(key));
+	public static GetAnswer get(String user, String table, String key) {
+		try {
+			return new GetAnswer(table, Files.getDB(UUID.fromString(user)).hashMap(table, Serializer.STRING, Serializer.STRING).createOrOpen().get(key));
+		} catch (DatabaseNotFoundException e) {
+			return new GetAnswer();
+		}
 	}
 	
-	public static ClearAnswer clear(String table) {
-		HTreeMap<String, String> map = db.hashMap(table, Serializer.STRING, Serializer.STRING).createOrOpen();
-		int before = map.size();
-		map.clear();
-		return new ClearAnswer(table, before - map.size(), map.size());
+	public static ClearAnswer clear(String user, String table) {
+		try {
+			HTreeMap<String, String> map = Files.getDB(UUID.fromString(user)).hashMap(table, Serializer.STRING, Serializer.STRING).createOrOpen();
+			int before = map.size();
+			map.clear();
+			return new ClearAnswer(table, before - map.size(), map.size());
+		} catch (DatabaseNotFoundException e) {
+			return new ClearAnswer();
+		}
 	}
 	
-	public static SizeAnswer size(String table) {
-		return new SizeAnswer(table, db.hashMap(table, Serializer.STRING, Serializer.STRING).createOrOpen().size());
+	public static SizeAnswer size(String user, String table) {
+		try {
+			return new SizeAnswer(table, Files.getDB(UUID.fromString(user)).hashMap(table, Serializer.STRING, Serializer.STRING).createOrOpen().size());
+		} catch (DatabaseNotFoundException e) {
+			return new SizeAnswer();
+		}
 	}
 	
-	public static DeleteAnswer delete(String table, String key) {
-		return new DeleteAnswer(table, key, db.hashMap(table, Serializer.STRING, Serializer.STRING).createOrOpen().remove(key) != null);
+	public static DeleteAnswer delete(String user, String table, String key) {
+		try {
+			return new DeleteAnswer(table, key, Files.getDB(UUID.fromString(user)).hashMap(table, Serializer.STRING, Serializer.STRING).createOrOpen().remove(key) != null);
+		} catch (DatabaseNotFoundException e) {
+			return new DeleteAnswer();
+		}
 	}
 	
 }

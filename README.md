@@ -28,5 +28,9 @@ In KVDB, security is based on tokens. For each tables, a Json Web Token (JWT) is
 
     GET /tables/:tableName/clear?token={token}
 		
+You can get a token (for testing purposes) using the following endpoint :
+
+    GET /token?user={userid}&table={tableName}
+User ID must be registered in the users.json file before any usage !
 
 

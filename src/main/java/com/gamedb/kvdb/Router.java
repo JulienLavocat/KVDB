@@ -1,8 +1,16 @@
 package com.gamedb.kvdb;
 
-import java.util.UUID;
+import com.gamedb.kvdb.http.ClearAnswer;
+import com.gamedb.kvdb.http.DatabaseNotFoundAnswer;
+import com.gamedb.kvdb.http.DeleteAnswer;
+import com.gamedb.kvdb.http.ExistAnswer;
+import com.gamedb.kvdb.http.GetAnswer;
+import com.gamedb.kvdb.http.GetMapAnswer;
+import com.gamedb.kvdb.http.PutAnswer;
+import com.gamedb.kvdb.http.SizeAnswer;
 
 import io.javalin.Javalin;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
@@ -19,22 +27,31 @@ public class Router {
 		});
 		
 		app.get("/tables/:table", ctx -> {
-			
-			if(!auth(ctx.queryParam("token"), ctx.param("table")))
+			String user = auth(ctx.queryParam("token"), ctx.param("table"));
+			if(user == null)
 				return;
 			
-			ctx.json(Tables.getMap(ctx.param("table")));
+			GetMapAnswer a = Tables.getMap(user, ctx.param("table"));
+			if(a.table == null)
+				ctx.json(new DatabaseNotFoundAnswer());
+			else
+				ctx.json(a);
 		});
 		
 		/*
 		 * Get value for specified key and table
 		 */
 		app.get("/tables/:table/get/:key", ctx -> {
-			
-			if(!auth(ctx.queryParam("token"), ctx.param("table")))
+			String user = auth(ctx.queryParam("token"), ctx.param("table"));
+			if(user == null)
 				return;
 			
-			ctx.json(Tables.get(ctx.param("table"), ctx.param("key")));
+			GetAnswer a = Tables.get(user, ctx.param("table"), ctx.param("key"));
+			
+			if(a.table == null)
+				ctx.json(new DatabaseNotFoundAnswer());
+			else
+				ctx.json(a);
 
 		});
 
@@ -42,11 +59,15 @@ public class Router {
 		 * Put a key and value in table
 		 */
 		app.get("/tables/:table/put", ctx -> {
-
-			if(!auth(ctx.queryParam("token"), ctx.param("table")))
+			String user = auth(ctx.queryParam("token"), ctx.param("table"));
+			if(user == null)
 				return;
 			
-			ctx.json(Tables.put(ctx.param("table"), ctx.queryParam("key"), ctx.queryParam("value")));
+			PutAnswer a = Tables.put(user, ctx.param("table"), ctx.queryParam("key"), ctx.queryParam("value"));
+			if(a.table == null)
+				ctx.json(new DatabaseNotFoundAnswer());
+			else
+				ctx.json(a);
 
 		});
 
@@ -54,11 +75,15 @@ public class Router {
 		 * Return true if specified value exist in db
 		 */
 		app.get("/tables/:table/exist/:key", ctx -> {
-
-			if(!auth(ctx.queryParam("token"), ctx.param("table")))
+			String user = auth(ctx.queryParam("token"), ctx.param("table"));
+			if(user == null)
 				return;
 			
-			ctx.json(Tables.exist(ctx.param("table"), ctx.param("key")));
+			ExistAnswer a = Tables.exist(user, ctx.param("table"), ctx.param("key"));
+			if(a.table == null)
+				ctx.json(new DatabaseNotFoundAnswer());
+			else
+				ctx.json(a);
 
 		});
 		
@@ -66,38 +91,49 @@ public class Router {
 		 * Delete the specified key from table
 		 */
 		app.get("/tables/:table/delete/:key", ctx -> {
-			
-			if(!auth(ctx.queryParam("token"), ctx.param("table")))
+			String user = auth(ctx.queryParam("token"), ctx.param("table"));
+			if(user == null)
 				return;
 			
-			ctx.json(Tables.delete(ctx.param("table"), ctx.param("key")));
+			DeleteAnswer a = Tables.delete(user, ctx.param("table"), ctx.param("key"));
+			if(a.table == null)
+				ctx.json(new DatabaseNotFoundAnswer());
+			else
+				ctx.json(a);
 		});
 		
 		/*
 		 * Drop the specified table
 		 */
 		app.get("/tables/:table/clear", ctx -> {
-
-			if(!auth(ctx.queryParam("token"), ctx.param("table")))
+			String user = auth(ctx.queryParam("token"), ctx.param("table"));
+			if(user == null)
 				return;
 			
-			ctx.json(Tables.clear(ctx.param("table")));
-			
+			ClearAnswer a = Tables.clear(user, ctx.param("table"));
+			if(a.table == null)
+				ctx.json(new DatabaseNotFoundAnswer());
+			else
+				ctx.json(a);
 		});
 		
 		app.get("/tables/:table/size", ctx -> {
-			
-			if(!auth(ctx.queryParam("token"), ctx.param("table")))
+			String user = auth(ctx.queryParam("token"), ctx.param("table"));
+			if(user == null)
 				return;
 			
-			ctx.json(Tables.size(ctx.param("table")));
+			SizeAnswer a = Tables.size(user, ctx.param("table"));
+			if(a.table == null)
+				ctx.json(new DatabaseNotFoundAnswer());
+			else
+				ctx.json(a);
 		});
 		
 		app.get("/token", ctx -> {
 			
 			String jwt = Jwts.builder()
 					.signWith(SignatureAlgorithm.HS256, KEY)
-					.claim("from", "julien")
+					.claim("user", ctx.queryParam("user"))
 					.setAudience(ctx.queryParam("table"))
 					//.setId(UUID.randomUUID().toString()) maybe consider using this to revoke token later on ?
 					.compact();
@@ -110,16 +146,16 @@ public class Router {
 	/*
 	 * Used to check that the users can access the requested table
 	 */
-	public boolean auth(String token, String table) {
+	public String auth(String token, String table) {
 		
 		try {
-			String access = Jwts.parser().setSigningKey(KEY).parseClaimsJws(token).getBody().getAudience();
-			if(access.equals(table))
-				return true;
+			Claims claims = Jwts.parser().setSigningKey(KEY).parseClaimsJws(token).getBody();
+			if(claims.getAudience().equals(table))
+				return (String) claims.get("user");
 			else
-				return false;
+				return null;
 		} catch(Exception e) {
-			return false;
+			return null;
 		}
 		
 	}

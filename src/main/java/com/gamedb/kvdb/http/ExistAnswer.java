@@ -12,4 +12,7 @@ public class ExistAnswer {
 		this.exist = exist;
 	}
 	
+	public ExistAnswer() {
+	}
+	
 }

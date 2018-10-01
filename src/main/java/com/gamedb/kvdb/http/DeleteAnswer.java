@@ -11,5 +11,9 @@ public class DeleteAnswer {
 		this.key = key;
 		this.deleted = deleted;
 	}
+
+	public DeleteAnswer() {
+		// TODO Auto-generated constructor stub
+	}
 	
 }

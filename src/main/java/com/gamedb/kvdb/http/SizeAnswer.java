@@ -10,4 +10,8 @@ public class SizeAnswer {
 		this.size = size;
 	}
 
+	public SizeAnswer() {
+		// TODO Auto-generated constructor stub
+	}
+
 }

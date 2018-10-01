@@ -11,4 +11,8 @@ public class ClearAnswer {
 		this.entryRemoved = entryRemoved;
 		this.entryLeft = entryLeft;
 	}
+
+	public ClearAnswer() {
+		
+	}
 }

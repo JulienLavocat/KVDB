@@ -9,5 +9,9 @@ public class GetAnswer {
 		this.table = table;
 		this.value = value;
 	}
+
+	public GetAnswer() {
+		
+	}
 	
 }

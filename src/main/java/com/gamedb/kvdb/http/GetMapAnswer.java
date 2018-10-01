@@ -11,5 +11,9 @@ public class GetMapAnswer {
 		this.table = table;
 		this.content = content;
 	}
+
+	public GetMapAnswer() {
+		
+	}
 	
 }

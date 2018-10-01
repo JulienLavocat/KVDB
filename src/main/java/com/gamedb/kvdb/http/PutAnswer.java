@@ -13,5 +13,9 @@ public class PutAnswer {
 		this.value = value;
 		this.created = created;
 	}
+
+	public PutAnswer() {
+		
+	}
 	
 }
