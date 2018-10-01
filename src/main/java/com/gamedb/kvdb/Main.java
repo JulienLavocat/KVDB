@@ -12,15 +12,13 @@ public class Main {
 			
 			Files.start();
 			
-			Tables.start();
-			
 			Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(new Runnable() {
 
 				@Override
 				public void run() {
 					
 					synchronized (Tables.db) {
-						Tables.db.commit();
+						Files.commit();
 					}
 					
 				}

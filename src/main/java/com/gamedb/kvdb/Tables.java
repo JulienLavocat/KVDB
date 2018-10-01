@@ -23,16 +23,6 @@ public class Tables {
 
 	public static DB db;
 	
-	public static void start() {
-		Path p = Paths.get("databases/tables.db");
-		File f = p.toAbsolutePath().toFile();
-		
-		db = DBMaker.fileDB(f)
-				.closeOnJvmShutdown()
-				.transactionEnable()
-				.make();
-	}
-	
 	public static GetMapAnswer getMap(String user, String table) {
 		try {
 			return new GetMapAnswer(table, Files.getDB(UUID.fromString(user)).hashMap(table, Serializer.STRING, Serializer.STRING).createOrOpen());
