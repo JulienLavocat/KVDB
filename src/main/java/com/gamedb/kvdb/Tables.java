@@ -11,7 +11,7 @@ import com.gamedb.kvdb.http.ClearAnswer;
 import com.gamedb.kvdb.http.DeleteAnswer;
 import com.gamedb.kvdb.http.ExistAnswer;
 import com.gamedb.kvdb.http.GetAnswer;
-import com.gamedb.kvdb.http.GetMapAnswer;
+import com.gamedb.kvdb.http.ShowAnswer;
 import com.gamedb.kvdb.http.PutAnswer;
 import com.gamedb.kvdb.http.SizeAnswer;
 
@@ -19,11 +19,11 @@ public class Tables {
 
 	public static DB db;
 	
-	public static GetMapAnswer getMap(String user, String table) {
+	public static ShowAnswer getMap(String user, String table) {
 		try {
-			return new GetMapAnswer(table, Files.getDB(UUID.fromString(user)).hashMap(table, Serializer.STRING, Serializer.STRING).createOrOpen());
+			return new ShowAnswer(table, Files.getDB(UUID.fromString(user)).hashMap(table, Serializer.STRING, Serializer.STRING).createOrOpen());
 		} catch (DatabaseNotFoundException e) {
-			return new GetMapAnswer();
+			return new ShowAnswer();
 		}
 	}
 	

@@ -40,6 +40,12 @@ public class Files {
 						.make();
 				dbs.put(UUID.fromString(id), db);
 				Files.users.add(id);
+				
+				p = Paths.get("databases/" + id + ".log");
+				f = p.toAbsolutePath().toFile();
+				if(!f.exists())
+					f.createNewFile();
+				
 			}
 			
 		} catch (IOException e) {

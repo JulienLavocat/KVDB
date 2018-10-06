@@ -5,6 +5,10 @@ import java.util.concurrent.TimeUnit;
 
 import org.mapdb.DB;
 
+import com.gamedb.kvdb.http.PutAnswer;
+import com.gamedb.kvdb.reporting.PutOperationReport;
+import com.google.gson.Gson;
+
 public class Main {
 
 	public static void main(String[] args) throws Exception {
@@ -28,13 +32,14 @@ public class Main {
 
 				}
 
-			}, 2, 2, TimeUnit.SECONDS);
+			}, 4, 2, TimeUnit.SECONDS);
 
 			new Router();
 		} catch(Exception e) {
 			Report.report(e);
 			e.printStackTrace();
 		}
+		
 	}
 
 }

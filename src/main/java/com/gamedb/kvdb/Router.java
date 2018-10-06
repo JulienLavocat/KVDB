@@ -14,7 +14,7 @@ import com.gamedb.kvdb.http.DatabaseNotFoundAnswer;
 import com.gamedb.kvdb.http.DeleteAnswer;
 import com.gamedb.kvdb.http.ExistAnswer;
 import com.gamedb.kvdb.http.GetAnswer;
-import com.gamedb.kvdb.http.GetMapAnswer;
+import com.gamedb.kvdb.http.ShowAnswer;
 import com.gamedb.kvdb.http.PutAnswer;
 import com.gamedb.kvdb.http.SizeAnswer;
 import com.google.gson.Gson;
@@ -64,11 +64,14 @@ public class Router {
 			if(user == null)
 				return;
 
-			GetMapAnswer a = Tables.getMap(user, ctx.param("table"));
+			ShowAnswer a = Tables.getMap(user, ctx.param("table"));
 			if(a.table == null)
 				ctx.json(new DatabaseNotFoundAnswer());
-			else
+			else {
 				ctx.json(a);
+				Report.reportShowOperation(UUID.fromString(user), a);
+			}
+				
 		});
 
 		/*
@@ -82,9 +85,10 @@ public class Router {
 			GetAnswer a = Tables.get(user, ctx.param("table"), ctx.param("key"));
 			if(a.table == null)
 				ctx.json(new DatabaseNotFoundAnswer());
-			else
+			else {
 				ctx.json(a);
-
+				Report.reportGetOperation(UUID.fromString(user), a);
+			}
 		});
 
 		/*
@@ -94,13 +98,20 @@ public class Router {
 			String user = auth(ctx.queryParam("token"), ctx.param("table"));
 			if(user == null)
 				return;
+			
+			if(ctx.anyQueryParamNull("key", "value"))
+				return;
 
 			PutAnswer a = Tables.put(user, ctx.param("table"), ctx.queryParam("key"), ctx.queryParam("value"));
 			if(a.table == null)
 				ctx.json(new DatabaseNotFoundAnswer());
-			else
+			else {
+				Report.reportPutOperation(UUID.fromString(user), a);
 				ctx.json(a);
-
+			}
+			
+			
+			
 		});
 
 		/*
@@ -114,8 +125,11 @@ public class Router {
 			ExistAnswer a = Tables.exist(user, ctx.param("table"), ctx.param("key"));
 			if(a.table == null)
 				ctx.json(new DatabaseNotFoundAnswer());
-			else
+			else {
+				Report.reportExistOperation(UUID.fromString(user), a);
 				ctx.json(a);
+			}
+				
 
 		});
 
@@ -130,8 +144,11 @@ public class Router {
 			DeleteAnswer a = Tables.delete(user, ctx.param("table"), ctx.param("key"));
 			if(a.table == null)
 				ctx.json(new DatabaseNotFoundAnswer());
-			else
+			else {
+				Report.reportDeleteOperation(UUID.fromString(user), a);
 				ctx.json(a);
+			}
+			
 		});
 
 		/*
@@ -145,8 +162,11 @@ public class Router {
 			ClearAnswer a = Tables.clear(user, ctx.param("table"));
 			if(a.table == null)
 				ctx.json(new DatabaseNotFoundAnswer());
-			else
+			else {
+				Report.reportClearOperation(UUID.fromString(user), a);
 				ctx.json(a);
+			}
+				
 		});
 
 		app.get("/tables/:table/size", ctx -> {
@@ -157,8 +177,11 @@ public class Router {
 			SizeAnswer a = Tables.size(user, ctx.param("table"));
 			if(a.table == null)
 				ctx.json(new DatabaseNotFoundAnswer());
-			else
+			else {
+				Report.reportSizeOperation(UUID.fromString(user), a);
 				ctx.json(a);
+			}
+				
 		});
 
 		app.get("/token", ctx -> {
@@ -192,7 +215,7 @@ public class Router {
 				switch(split[0]) {
 
 				case "show":
-					GetMapAnswer show = Tables.getMap(split[1],table);
+					ShowAnswer show = Tables.getMap(split[1],table);
 					if(show.table == null)
 						session.send(gson.toJson(new DatabaseNotFoundAnswer()));
 					else
